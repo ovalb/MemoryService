@@ -1,24 +1,43 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"spaced.com/handler"
-
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
+	"memory.com/database"
+	"memory.com/handler"
 )
 
 func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/items/id/{id}", handler.ItemByIdHandler).Methods("GET")
-	r.HandleFunc("/items/tag/{tag}", handler.ItemsByTagHandler).Methods("GET")
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
 
-	r.HandleFunc("/items/", handler.AddItemHandler).Methods("POST")
+	c := &handler.Repository{
+		Database: database.New(),
+	}
 
-	r.HandleFunc("/items/{id}", handler.DeleteItemHandler).Methods("DELETE")
+	c.Database.AutoMigrate(&handler.Item{})
+	// c.Database.AutoMigrate(&handler.Tag{})
+
+	r := gin.Default()
+
+	r.GET("/:id", c.GetItemById)
+	r.POST("/items", c.AddItem)
 
 	http.Handle("/", r)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	go func() {
+		fmt.Println("server starting at port 8080")
+		log.Fatal(http.ListenAndServe(":8080", nil))
+	}()
+
+	fmt.Println("now waiting for sigterm or something")
+	s := <-sigs
+	log.Fatalf("Got signal: %v. Bye bye.", s)
+
 }
