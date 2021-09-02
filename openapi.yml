@@ -1,0 +1,23 @@
+openapi: 3.0.0
+info:
+    title: Memory API
+    description: API that handles memorization of items through spaced repetition
+    version: 1.0.0
+paths:
+  /items/{id}:
+    get:
+      summary: Get items by id
+      responses:
+        '200':
+          description: Item returned
+          content:
+            'application/json': {}
+            'application/xml': {}
+        '404':
+          description: Item not found
+          content:
+            'application/json': {}
+            'application/xml': {} 
+      
+      
+
