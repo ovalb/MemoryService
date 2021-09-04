@@ -9,8 +9,8 @@ import (
 	"syscall"
 
 	"github.com/gin-gonic/gin"
-	"memory.com/database"
-	"memory.com/handler"
+	"github.com/ovalb/memory/database"
+	"github.com/ovalb/memory/handler"
 )
 
 func main() {
